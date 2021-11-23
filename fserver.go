@@ -19,6 +19,6 @@ func main() {
 }
 
 func init() {
-	flag.StringVar(&port, "p", "8888", "fserver listen port")
+	flag.StringVar(&port, "p", "8080", "fserver listen port")
 	flag.StringVar(&directory, "d", ".", "fserver root directory")
 }
