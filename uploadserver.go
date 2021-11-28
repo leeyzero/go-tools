@@ -33,7 +33,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		defer file.Close()
 
-		dst, err := os.Create(strings.TrimLeft(gTargetDir, "/") + "/" + files[i].Filename)
+		dst, err := os.Create(strings.TrimRight(gTargetDir, "/") + "/" + files[i].Filename)
 		if err != nil {
 			fmt.Fprintln(w, err)
 			return
