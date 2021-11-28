@@ -6,18 +6,19 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
+
+	"github.com/leeyzero/go-tools/utils"
 )
 
-const (
-	// 最大上传文件大小50MB
-	MAX_UPLOAD_SIZE = 50 << 20
-
-	// 文件保证位置
-	SAVE_PATH = "/tmp/"
+var (
+	gAddr      string
+	gTargetDir string
+	gMaxMemory int64
 )
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(MAX_UPLOAD_SIZE)
+	err := r.ParseMultipartForm(gMaxMemory)
 	if err != nil {
 		fmt.Fprintln(w, err)
 		return
@@ -32,7 +33,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		defer file.Close()
 
-		dst, err := os.Create(SAVE_PATH + files[i].Filename)
+		dst, err := os.Create(strings.TrimLeft(gTargetDir, "/") + "/" + files[i].Filename)
 		if err != nil {
 			fmt.Fprintln(w, err)
 			return
@@ -49,12 +50,14 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func main() {
-	addr := ":8080"
-	if len(os.Args) > 1 {
-		addr = os.Args[1]
-	}
+func init() {
+	gAddr = utils.TryGetEnvString("ADDR", ":8080")
+	gTargetDir = utils.TryGetEnvString("TARGET_DIR", "/tmp")
+	gMaxMemory = utils.TryGetEnvInt64("MAX_MEMORY", 50<<20)
+}
 
+func main() {
+	log.Printf("serve on ADDR=%s TARGET_DIR=%s MAX_MEMORY=%d\n", gAddr, gTargetDir, gMaxMemory)
 	http.HandleFunc("/upload", uploadHandler)
-	log.Fatal(http.ListenAndServe(addr, nil))
+	log.Fatal(http.ListenAndServe(gAddr, nil))
 }
