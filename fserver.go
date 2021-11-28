@@ -1,24 +1,23 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"net/http"
+
+	"github.com/leeyzero/go-tools/utils"
 )
 
 var (
-	port      string
-	directory string
+	gAddr    string
+	gRootDir string
 )
 
-func main() {
-	flag.Parse()
-
-	log.Printf("fserver listen on port:%v, root:%v", port, directory)
-	log.Fatal(http.ListenAndServe(":"+port, http.FileServer(http.Dir(directory))))
+func init() {
+	gAddr = utils.TryGetEnvString("ADDR", ":8080")
+	gRootDir = utils.TryGetEnvString("ROOT_DIR", ".")
 }
 
-func init() {
-	flag.StringVar(&port, "p", "8080", "fserver listen port")
-	flag.StringVar(&directory, "d", ".", "fserver root directory")
+func main() {
+	log.Printf("serve on ADDR=%v, ROOT_DIR:%v", gAddr, gRootDir)
+	log.Fatal(http.ListenAndServe(gAddr, http.FileServer(http.Dir(gRootDir))))
 }
